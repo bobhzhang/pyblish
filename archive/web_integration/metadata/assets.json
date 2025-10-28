@@ -1,0 +1,56 @@
+{
+  "Scene_SceneSettings_20251009_165045": {
+    "asset_id": "Scene_SceneSettings_20251009_165045",
+    "name": "SceneSettings",
+    "family": "Scene",
+    "families": [
+      "scene",
+      "settings",
+      "configuration"
+    ],
+    "description": "Scene settings and configuration for untitled",
+    "scene": "",
+    "plugin": "CollectScene",
+    "maya_objects": [],
+    "metadata": {
+      "frame_range": [
+        1,
+        120
+      ],
+      "fps": 30,
+      "current_renderer": "mayaSoftware",
+      "render_resolution": [
+        960,
+        540
+      ],
+      "linear_units": "cm",
+      "angular_units": "deg"
+    },
+    "timestamp": "2025-10-09T16:50:47.146090"
+  },
+  "Model_DefaultModel_20251009_165049": {
+    "asset_id": "Model_DefaultModel_20251009_165049",
+    "name": "DefaultModel",
+    "family": "Model",
+    "families": [
+      "model",
+      "geometry",
+      "mesh"
+    ],
+    "description": "Model group with 1 meshes",
+    "scene": "untitled",
+    "plugin": "CollectModels",
+    "maya_objects": [
+      "|pCylinder1|pCylinderShape1"
+    ],
+    "metadata": {
+      "mesh_count": 1,
+      "total_vertices": 42,
+      "total_faces": 60,
+      "meshes": [
+        "|pCylinder1|pCylinderShape1"
+      ]
+    },
+    "timestamp": "2025-10-09T16:50:51.339619"
+  }
+}

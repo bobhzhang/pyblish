@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pyblish Production Pipeline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .pipeline-flow {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .flow-title {
+            text-align: center;
+            font-size: 1.5em;
+            margin-bottom: 30px;
+            color: #4a5568;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .flow-step {
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .flow-step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .flow-step.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .flow-step h3 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        
+        .flow-step p {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .flow-arrow {
+            font-size: 2em;
+            color: #a0aec0;
+            margin: 0 10px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            font-size: 1.1em;
+            color: #4a5568;
+        }
+        
+        .assets-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .section-title {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #4a5568;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+        
+        .asset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .asset-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .asset-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .asset-family {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            margin-bottom: 10px;
+        }
+        
+        .asset-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+        
+        .asset-description {
+            color: #718096;
+            margin-bottom: 15px;
+        }
+        
+        .asset-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: #a0aec0;
+        }
+        
+        .nav-buttons {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn-secondary {
+            background: #48bb78;
+        }
+        
+        .btn-secondary:hover {
+            background: #38a169;
+        }
+        
+        @media (max-width: 768px) {
+            .flow-diagram {
+                flex-direction: column;
+            }
+            
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 Pyblish Production Pipeline</h1>
+            <p>Asset Management & Integration System</p>
+        </div>
+        
+        <div class="pipeline-flow">
+            <h2 class="flow-title">Production Pipeline Flow</h2>
+            <div class="flow-diagram">
+                <div class="flow-step active">
+                    <h3>📦 COLLECTION</h3>
+                    <p>Gather assets from Maya scene</p>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <h3>✅ VALIDATION</h3>
+                    <p>Check quality standards</p>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <h3>📤 EXTRACTION</h3>
+                    <p>Export assets to files</p>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <h3>🔗 INTEGRATION</h3>
+                    <p>Upload to pipeline</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="total-assets">{{ assets|length }}</div>
+                <div class="stat-label">Total Assets</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="models-count">
+                    {% set model_count = assets.values() | selectattr('family', 'equalto', 'Model') | list | length %}
+                    {{ model_count }}
+                </div>
+                <div class="stat-label">Models</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="materials-count">
+                    {% set material_count = assets.values() | selectattr('family', 'equalto', 'Material') | list | length %}
+                    {{ material_count }}
+                </div>
+                <div class="stat-label">Materials</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="animations-count">
+                    {% set animation_count = assets.values() | selectattr('family', 'equalto', 'Animation') | list | length %}
+                    {{ animation_count }}
+                </div>
+                <div class="stat-label">Animations</div>
+            </div>
+        </div>
+        
+        <div class="assets-section">
+            <h2 class="section-title">Recent Assets</h2>
+            <div class="asset-grid">
+                {% for asset_id, asset in assets.items() %}
+                <div class="asset-card">
+                    <div class="asset-family">{{ asset.family or 'Unknown' }}</div>
+                    <div class="asset-name">{{ asset.asset or asset_id }}</div>
+                    <div class="asset-description">{{ asset.description or 'No description available' }}</div>
+                    <div class="asset-meta">
+                        <span>{{ asset.plugin or 'Unknown Plugin' }}</span>
+                        <span>{{ asset.timestamp[:10] if asset.timestamp else 'Unknown Date' }}</span>
+                    </div>
+                </div>
+                {% else %}
+                <div class="asset-card">
+                    <div class="asset-name">No assets found</div>
+                    <div class="asset-description">Start by running the Pyblish collection process in Maya</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="nav-buttons">
+            <a href="/dashboard" class="btn">📊 Dashboard</a>
+            <a href="/api/assets" class="btn btn-secondary">🔌 API</a>
+        </div>
+    </div>
+    
+    <script>
+        // Auto-refresh stats every 30 seconds
+        setInterval(function() {
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('total-assets').textContent = data.total_assets;
+                    document.getElementById('models-count').textContent = data.by_family['Model'] || 0;
+                    document.getElementById('materials-count').textContent = data.by_family['Material'] || 0;
+                    document.getElementById('animations-count').textContent = data.by_family['Animation'] || 0;
+                });
+        }, 30000);
+    </script>
+</body>
+</html>

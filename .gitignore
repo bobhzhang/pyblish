@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Web server runtime
+web_server/asset_server.sqlite3
+web_server/_tmp/
+web_server/storage_root/
+web_server/__pycache__/
+
+# Generated/large
+exports/
+assets/
+
+thumbnails/
+
+# Logs
+*.log
+

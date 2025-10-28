@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Pyblish Web Assets</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 20px; background: #1f1f1f; color: #ddd; }
+input, select, button { padding: 6px; margin-right: 6px; }
+a { color: #6cf; }
+.table { border-collapse: collapse; width: 100%; }
+.table th, .table td { border-bottom: 1px solid #333; padding: 8px; text-align: left; }
+.badge { padding: 2px 6px; border-radius: 4px; background: #333; }
+.small { font-size: 12px; color: #aaa; }
+.action-btn { margin-right: 8px; }
+ .warn { color: #f99; }
+
+ .ok { color: #9f9; }
+ .err { color: #f99; }
+
+</style>
+</head>
+<body>
+<h2>Pyblish Web Assets</h2>
+<div style="margin-bottom:10px;">
+  <span id="keyStatus" class="small"></span>
+
+  <label>API Key</label>
+  <input id="apiKey" type="password" placeholder="bob_key" />
+  <button id="btnApplyKey" class="action-btn">Apply</button>
+  <span class="small">Not stored. You must re-enter on each visit.</span>
+</div>
+<div>
+  <label>Family</label>
+  <select id="family">
+    <option value="">All</option>
+    <option>model</option>
+    <option>rig</option>
+    <option>animation</option>
+    <option>material</option>
+    <option>scene</option>
+    <option>camera</option>
+  </select>
+  <button onclick="loadAssets()">Load</button>
+</div>
+  <span id="tip" class="small warn"></span>
+
+<table class="table" id="tbl">
+
+
+  <thead>
+    <tr><th>ID</th><th>Name</th><th>Family</th><th>Status</th><th>Updated</th><th>Actions</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+let API_KEY = '';
+function headers(){
+  return API_KEY ? { 'X-API-Key': API_KEY } : {};
+}
+async function verifyKey(){
+  const el = document.getElementById('keyStatus');
+  if(el){ el.textContent=''; el.className='small'; }
+  if(!API_KEY){ if(el){ el.textContent='请输入 API Key'; el.className='small err'; } return false; }
+  try{
+    const r = await fetch('/api/assets', { headers: headers() });
+    if(r.status === 200){ if(el){ el.textContent='✓ Key OK'; el.className='small ok'; } return true; }
+    if(r.status === 401){ if(el){ el.textContent='✗ Key 无效'; el.className='small err'; } return false; }
+    if(el){ el.textContent='检查失败: ' + r.status; el.className='small warn'; }
+    return false;
+  }catch(e){ if(el){ el.textContent='请求异常: ' + e.message; el.className='small err'; } return false; }
+}
+
+async function latestVersion(assetId){
+  try{
+    const r = await fetch(`/api/assets/${assetId}`, { headers: headers() });
+    const d = await r.json();
+    const vs = (d.versions||[]).map(v=>v.version);
+    return vs.length? Math.max(...vs) : 1;
+  }catch(e){ return 1; }
+}
+async function loadAssets(){
+  const fam = document.getElementById('family').value;
+  const url = '/api/assets' + (fam? ('?family=' + encodeURIComponent(fam)) : '');
+  const tb = document.querySelector('#tbl tbody');
+  tb.innerHTML = '';
+  const tip = document.getElementById('tip');
+  if(tip){ tip.textContent=''; }
+  try{
+    const res = await fetch(url, { headers: headers() });
+    if(res.status === 401){ if(tip){ tip.textContent='请输入 API Key（如 bob_key）然后点击 Apply'; } return; }
+    if(!res.ok){ if(tip){ tip.textContent='加载失败: ' + res.status; } return; }
+    const data = await res.json();
+    for(const a of (data.items||[])){
+      const tr = document.createElement('tr');
+      const v = await latestVersion(a.id);
+      const pkgUrl = `/api/assets/${a.id}/package?version=${v}`; // download is public
+      tr.innerHTML = `<td>${a.id}</td>`+
+        `<td>${a.name}</td>`+
+        `<td><span class=\"badge\">${a.family}</span></td>`+
+        `<td>${a.status||''}</td>`+
+        `<td>${a.updated_at||''}</td>`+
+        `<td>`+
+          `<a href=\"/api/assets/${a.id}\" target=\"_blank\" class=\"action-btn\">detail</a>`+
+          `<a href=\"${pkgUrl}\" class=\"action-btn\">download zip</a>`+
+          `<button class=\"action-btn\" data-id=\"${a.id}\" onclick=\"onDelete(this)\">删除</button>`+
+        `</td>`;
+      tb.appendChild(tr);
+    }
+  }catch(e){ if(tip){ tip.textContent='请求异常: ' + e.message; } }
+}
+async function onDelete(btn){
+  const id = btn.getAttribute('data-id');
+  if(!id) return;
+  if(!API_KEY){ alert('需要 admin API Key'); return; }
+  if(!confirm(`删除资产 ${id} ? 该操作不可恢复`)) return;
+  const r = await fetch(`/api/assets/${id}`, { method: 'DELETE', headers: headers() });
+  if(r.status === 200){
+    loadAssets();
+  }else{
+    const t = await r.text();
+    alert('删除失败: ' + r.status + ' ' + t);
+  }
+}
+// init UI
+(function(){
+  const box = document.getElementById('apiKey');
+  document.getElementById('btnApplyKey').onclick = async ()=>{ API_KEY = box.value||''; const ok = await verifyKey(); if(ok) loadAssets(); };
+  // 初次不带 Key 尝试加载，给出提示
+  loadAssets();
+})();
+</script>
+</body>
+</html>
+
