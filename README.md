@@ -67,9 +67,11 @@ set WEB_API_KEY=bob_key
 - Install Flask (and requests for local tests)
 
 ```bash
-pip install flask requests
-python -m web_server.app
-```
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -U pip
+python.exe -m pip install flask requests
+
+.\.venv\Scripts\python.exe -c "from web_server.app import app; app.run(host='127.0.0.1', port=5000, debug=False)"
 
 ## Notes
 - SQLite DB and storage live under `web_server/`
